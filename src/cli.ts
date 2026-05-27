@@ -1,31 +1,88 @@
-//CLI: Command Line Interface
+// CLI: Command Line Interface
+
+// import Xpto from './core'
+// import { Item as ItemApelido, TodoList as TodoListApelido } from './core'
+// import { Item, TodoList } from './core'
 
 import TodoListApelido, { Item } from './core'
 
-const TodoList = new TodoListApelido('todoList.json')
-const params = process.argv;
-const command = params[2];
 
-if (command === 'add'){
-    const value = params[3];
+const todolist = new TodoListApelido('todolist.json')
+const params = process.argv
+const command = params[2]
+
+// ------------------------------------------------------------------------------
+// --- Comando List
+// ------------------------------------------------------------------------------
+
+if (command === 'list') {
+    const items = await todolist.getItems()
+    console.log('Lista')
+
+    for (let index = 0; index < items.length; index++) {
+        const item = items
+    }
+    //  console.log('${index})
+    // }
+
+    items.forEach(((Item, index) => {
+        console.log('${index}: ${Item.title}')
+    }))
+
+    process.exit(0)
+}
+
+// ------------------------------------------------------------------------------
+// --- Comando Add
+// ------------------------------------------------------------------------------
+
+if (command === 'add') {
+    const value = params[3]
 
     if (!value) {
-        console.log('Valor do item não pode ser nulo ou vazio')
+        console.error('Valor do item não pode ser nulo ou vazio')
         process.exit(1)
     }
 
     try {
-        await TodoList.addItem(new Item(value))
+        await todolist.addItem(new Item(value))
     } catch (error) {
-        console.error('Erro ao adicionar item.', error)
+        console.error('Erro ao adicionar item:', error)
         process.exit(1)
     }
-    
+
     console.log('Item adicionado com sucesso:', value)
-    process.exit(0);
+    process.exit(0)
+}
+// ------------------------------------------------------------------------------
+// --- Comando Remove
+// ------------------------------------------------------------------------------
+
+if (command == 'remove') {
+    const indexStr = params[3]
+    if (!indexStr) {
+        console.error('indice do item a ser removido não pode ser nulo ou vazio')
+        process.exit(1)
+    }
+    const index = parseInt(indexStr)
+    if (isNaN(index)) {
+        console.error('indice precisa ser um número.', indexStr)
+        process.exit(1)
+    }
+    await todolist.removeItem(index)
+    console.log('item removido com sucesso:', index)
+    process.exit(0)
 }
 
-if (command)
-    console.log('Comando não reconhecido: ${command}')
+// ------------------------------------------------------------------------------
+// --- Fallback para comandos não reconhecidos
+// ------------------------------------------------------------------------------
 
-console.log('não entrou em nenhum if');
+if (command)
+    console.log(`Comando não reconhecido: ${command}`)
+
+console.log(`Comandos disponíveis:
+- add <item>: Adiciona um item à lista
+- remove <index>: Remove um item da lista por indice
+- list: Lista os itens atuais
+`)
